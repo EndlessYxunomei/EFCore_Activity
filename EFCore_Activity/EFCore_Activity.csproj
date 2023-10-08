@@ -33,4 +33,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EFCore_DBLibrary\EFCore_DBLibrary.csproj" />
+  </ItemGroup>
+
 </Project>
