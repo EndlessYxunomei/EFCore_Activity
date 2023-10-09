@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EFCore_DBLibrary\EFCore_DBLibrary.csproj" />
+    <ProjectReference Include="..\InventoryHelpers\InventoryHelpers.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,13 +12,14 @@ namespace EFCore_DBLibrary
         //созданеи таблиц
         public DbSet<Item> Items { get; set; }
 
-        //пустой конструктор для возможности scuffold базы данных
+        //пустой конструктор для возможности scaffold базы данных
         public InventoryDbContext() { }
         //конструктор для dependensy injection
         public InventoryDbContext(DbContextOptions options) : base(options) { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //На случай, если мы не предаём настроек, то прописываем значение по умолчанию
             if (!optionsBuilder.IsConfigured)
             {
                 var builder = new ConfigurationBuilder()

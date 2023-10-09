@@ -1,4 +1,5 @@
 ﻿using EFCore_DBLibrary;
+using InventoryHelpers;
 using InventoryModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
