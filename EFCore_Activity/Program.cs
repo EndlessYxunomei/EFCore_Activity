@@ -10,10 +10,15 @@ namespace EFCore_Activity
     {
         private static IConfigurationRoot _configuration;
         private static DbContextOptionsBuilder<InventoryDbContext> _optionsBuilder;
+
+        //пока нет нормальных пользователей заменяем их константой
+        private const string _systemUserId = "2df28110-93d0-427d-9207-d55dbca680fa";
+        private const string _loggedInUserID = "e2eb8989-a81a-4151-8e86-eb95-a7961da2";
         
         static void Main(string[] args)
         {
             BuildOptions();
+            DeleteAllItems();
             EnsureItems();
             ListInventory();
         }
@@ -33,6 +38,7 @@ namespace EFCore_Activity
         }
         private static void EnsureItem(string name)
         {
+            Random r = new Random();//случайное чисто для количечества
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
                 //опрееляем есть ли подобные записи
@@ -40,7 +46,7 @@ namespace EFCore_Activity
                 if (existingItem == null)
                 {
                     //если нет, то создаем новый объект и добавлем его
-                    var item = new Item() { Name = name };
+                    var item = new Item() { Name = name, CreatedByUserId = _loggedInUserID, IsActive = true, Quantity = r.Next()};
                     db.Items.Add(item);
                     db.SaveChanges();
                 }
@@ -52,6 +58,15 @@ namespace EFCore_Activity
             {
                 var items = db.Items.OrderBy(x => x.Name).ToList();
                 items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));
+            }
+        }
+        private static void DeleteAllItems()
+        {
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                var items = db.Items.ToList();
+                db.Items.RemoveRange(items);
+                db.SaveChanges();
             }
         }
     }

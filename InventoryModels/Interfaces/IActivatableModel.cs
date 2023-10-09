@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InventoryModels.Interfaces
 {
-    internal interface IActivatableModel
+    public interface IActivatableModel
     {
         public bool IsActive { get; set; }
     }
