@@ -14,6 +14,8 @@ namespace EFCore_DBLibrary
 
         //созданеи таблиц
         public DbSet<Item> Items { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<CategoryDetail> CategoryDetails { get; set; }
 
         //пустой конструктор для возможности scaffold базы данных
         public InventoryDbContext() { }
@@ -33,6 +35,26 @@ namespace EFCore_DBLibrary
                 
                 optionsBuilder.UseSqlServer(cnstr);
             }
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //настраиваем вручную связь многие-со-многими между Player и Item
+            modelBuilder.Entity<Item>()
+                .HasMany(x => x.Players)
+                .WithMany(p => p.Items)
+                .UsingEntity<Dictionary<string, object>>(
+                "ItemPlayers",
+                ip => ip.HasOne<Player>()
+                .WithMany()
+                .HasForeignKey("PlayerId")
+                .HasConstraintName("FK_ItemPlayer_Players_PlayerId")
+                .OnDelete(DeleteBehavior.Cascade),
+                ip => ip.HasOne<Item>()
+                .WithMany()
+                .HasForeignKey("ItemId")
+                .HasConstraintName("FK_PlayerItem_Items_ItemId")
+                .OnDelete(DeleteBehavior.ClientCascade));
+            //base.OnModelCreating(modelBuilder);
         }
         public override int SaveChanges()
         {
@@ -73,7 +95,6 @@ namespace EFCore_DBLibrary
                             break;
                     }
                 }
-                //System.Diagnostics.Debug.WriteLine($"{entry.Entity} has state {entry.State}");
             }
             return base.SaveChanges();
         }
