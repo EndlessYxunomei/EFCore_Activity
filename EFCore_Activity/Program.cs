@@ -48,7 +48,8 @@ namespace EFCore_Activity
                 if (existingItem == null)
                 {
                     //если нет, то создаем новый объект и добавлем его
-                    var item = new Item() { Name = name, CreatedByUserId = _loggedInUserID, IsActive = true, Quantity = r.Next(), Description = description, Notes = notes};
+                    var item = new Item() { Name = name, CreatedByUserId = _loggedInUserID, IsActive = true, Quantity = r.Next(),
+                        Description = description, Notes = notes};
                     db.Items.Add(item);
                     db.SaveChanges();
                 }
