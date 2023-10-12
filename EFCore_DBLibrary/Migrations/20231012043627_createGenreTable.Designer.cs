@@ -4,6 +4,7 @@ using EFCore_DBLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFCore_DBLibrary.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    partial class InventoryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231012043627_createGenreTable")]
+    partial class createGenreTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,30 +191,6 @@ namespace EFCore_DBLibrary.Migrations
                     b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("InventoryModels.ItemGenre", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
-
-                    b.HasIndex("ItemId", "GenreId")
-                        .IsUnique();
-
-                    b.ToTable("ItemGenres");
-                });
-
             modelBuilder.Entity("InventoryModels.Player", b =>
                 {
                     b.Property<int>("Id")
@@ -290,25 +269,6 @@ namespace EFCore_DBLibrary.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("InventoryModels.ItemGenre", b =>
-                {
-                    b.HasOne("InventoryModels.Genre", "Genre")
-                        .WithMany("GenreItems")
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("InventoryModels.Item", "Item")
-                        .WithMany("ItemGenres")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Genre");
-
-                    b.Navigation("Item");
-                });
-
             modelBuilder.Entity("ItemPlayers", b =>
                 {
                     b.HasOne("InventoryModels.Item", null)
@@ -332,16 +292,6 @@ namespace EFCore_DBLibrary.Migrations
                         .IsRequired();
 
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("InventoryModels.Genre", b =>
-                {
-                    b.Navigation("GenreItems");
-                });
-
-            modelBuilder.Entity("InventoryModels.Item", b =>
-                {
-                    b.Navigation("ItemGenres");
                 });
 #pragma warning restore 612, 618
         }

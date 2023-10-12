@@ -24,5 +24,6 @@ namespace InventoryModels
         public int? CategoryId { get; set; }
         public virtual Category Category { get; set; }
         public virtual List<Player> Players { get; set; } = new List<Player>();
+        public virtual List<ItemGenre> ItemGenres { get; set; } = new List<ItemGenre>();
     }
 }
