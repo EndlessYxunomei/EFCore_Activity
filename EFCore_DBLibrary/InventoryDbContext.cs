@@ -55,6 +55,12 @@ namespace EFCore_DBLibrary
                 .HasForeignKey("ItemId")
                 .HasConstraintName("FK_PlayerItem_Items_ItemId")
                 .OnDelete(DeleteBehavior.ClientCascade));
+
+            //реализовано через аннотации в классе ItemGenre
+            /*modelBuilder.Entity<ItemGenre>()
+                .HasIndex(ig => new { ig.ItemId, ig.GenreId })
+                .IsUnique()
+                .IsClustered(false);*/
             //base.OnModelCreating(modelBuilder);
         }
         public override int SaveChanges()
