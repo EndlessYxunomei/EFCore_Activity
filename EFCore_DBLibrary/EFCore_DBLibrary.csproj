@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
+    <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
+    <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />

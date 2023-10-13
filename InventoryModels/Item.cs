@@ -6,7 +6,7 @@ namespace InventoryModels
     {
         [Required]
         [StringLength(InventoryModelConstants.MAX_NAME_LENGTH)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         [Range(InventoryModelConstants.MINIMUM_QUANTITY, InventoryModelConstants.MAXIMUM_QUANTITY)]
         public int Quantity { get; set; }
         [StringLength(InventoryModelConstants.MAX_DESCRIPTION_LENGTH)]
@@ -22,7 +22,7 @@ namespace InventoryModels
         [Range(InventoryModelConstants.MINIMUM_PRICE, InventoryModelConstants.MAXIMUM_PRICE)]
         public decimal? CurrentOrFinalPrice { get; set; }
         public int? CategoryId { get; set; }
-        public virtual Category Category { get; set; }
+        public virtual Category? Category { get; set; }
         public virtual List<Player> Players { get; set; } = new List<Player>();
         public virtual List<ItemGenre> ItemGenres { get; set; } = new List<ItemGenre>();
     }

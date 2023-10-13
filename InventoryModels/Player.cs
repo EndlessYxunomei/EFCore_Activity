@@ -11,7 +11,7 @@ namespace InventoryModels
     {
         [Required]
         [StringLength(InventoryModelConstants.MAX_PLAYERNAME_LENGTH)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         [StringLength(InventoryModelConstants.MAX_PLAYERDESCRIPTION_LENGTH)]
         public string Description { get; set; }
         public virtual List<Item> Items { get; set; } = new List<Item>();

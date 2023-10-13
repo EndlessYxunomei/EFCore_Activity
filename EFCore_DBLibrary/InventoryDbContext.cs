@@ -1,4 +1,5 @@
 ﻿using InventoryModels;
+using InventoryModels.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -17,6 +18,7 @@ namespace EFCore_DBLibrary
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<GetItemForListingDTO> ItemsForListing { get; set; }
 
         //пустой конструктор для возможности scaffold базы данных
         public InventoryDbContext() { }
@@ -62,6 +64,12 @@ namespace EFCore_DBLibrary
                 .IsUnique()
                 .IsClustered(false);*/
             //base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<GetItemForListingDTO>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("ItemsForListing");
+            });
         }
         public override int SaveChanges()
         {

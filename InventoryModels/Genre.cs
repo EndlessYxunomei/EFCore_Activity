@@ -11,7 +11,7 @@ namespace InventoryModels
     {
         [Required]
         [StringLength(InventoryModelConstants.MAX_GENRENAME_LENGTH)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public virtual List<ItemGenre> GenreItems { get; set; } = new List<ItemGenre>();
     }
 }

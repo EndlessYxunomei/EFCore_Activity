@@ -23,6 +23,7 @@ namespace EFCore_Activity
             EnsureItems();
             UpdateItems();
             ListInventory();
+            GetItemsForListing();
         }
         static void BuildOptions()
         {
@@ -83,6 +84,27 @@ namespace EFCore_Activity
                 }
                 db.Items.UpdateRange(items);
                 db.SaveChanges();
+            }
+        }
+        private static void GetItemsForListing()
+        {
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                //используем ДТОшку вместо прямого вывода, чтобы избежать ошибок
+                //var results = db.Items.FromSqlRaw("EXECUTE dbo.GetItemsForListing").ToList();
+                var results = db.ItemsForListing.FromSqlRaw("EXECUTE dbo.GetItemsForListing").ToList();
+                foreach (var item in results)
+                {
+                    //не работает та как нет id в выходных данных встроенной процедуры
+                    //Console.WriteLine($"ITEM {item.Id} {item.Name}");
+                    var output = $"ITEM {item.Name}] {item.Description}";
+                    if (!string.IsNullOrWhiteSpace(item.CategoryName))
+                    {
+                        output = $"{output} has category: {item.CategoryName}";
+                    }
+
+                    Console.WriteLine(output);
+                }
             }
         }
     }
