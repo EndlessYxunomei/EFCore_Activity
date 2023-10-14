@@ -11,6 +11,7 @@
     <None Remove="Migrations\Scripts\Functions\ItemNamesPipeDelimitedString\ItemNamesPipeDelimitedString.v0.sql" />
     <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
     <None Remove="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+    <None Remove="Migrations\Scripts\Views\FullItemDetails\FullItemsDetails.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +19,7 @@
     <EmbeddedResource Include="Migrations\Scripts\Functions\ItemNamesPipeDelimitedString\ItemNamesPipeDelimitedString.v0.sql" />
     <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v0.sql" />
     <EmbeddedResource Include="Migrations\Scripts\Procedures\GetItemsForListing\GetItemsForListing.v1.sql" />
+    <EmbeddedResource Include="Migrations\Scripts\Views\FullItemDetails\FullItemsDetails.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>

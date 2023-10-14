@@ -21,6 +21,7 @@ namespace EFCore_DBLibrary
         public DbSet<GetItemForListingDTO> ItemsForListing { get; set; }
         public DbSet<AllItemsPipeDelimitedStringDTO> AllItemsOutput { get; set; }
         public DbSet<GetItemsTotalValueDTO> GetItemsTotalValues {  get; set; }
+        public DbSet<FullItemDetailDTO> FullItemsDetailDtos { get; set; }
 
         //пустой конструктор для возможности scaffold базы данных
         public InventoryDbContext() { }
@@ -82,6 +83,11 @@ namespace EFCore_DBLibrary
             {
                 x.HasNoKey();
                 x.ToView("GetItemsTotalValues");
+            });
+            modelBuilder.Entity<FullItemDetailDTO>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("FullItemsDetailDtos");
             });
 
             //делаем значения по умолчанию для Жанра

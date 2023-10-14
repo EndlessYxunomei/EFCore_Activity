@@ -27,6 +27,7 @@ namespace EFCore_Activity
             GetItemsForListing();
             GetAllActiveItemsAsPipeDelimitedString();
             GetItemsTotalValues();
+            GetFullItemDetails();
         }
         static void BuildOptions()
         {
@@ -130,6 +131,17 @@ namespace EFCore_Activity
                 foreach (var item in result)
                 {
                     Console.WriteLine($"New Item] {item.Id, -10}" + $" | {item.Name, -50}" + $" | {item.Quantity, -4}" + $" | {item.TotalValue, -5}");
+                }
+            }
+        }
+        private static void GetFullItemDetails()
+        {
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                var result = db.FullItemsDetailDtos.FromSqlRaw("SELECT * FROM [dbo].[vwFullItemsDetails]").ToList();
+                foreach (var item in result)
+                {
+                    Console.WriteLine($"New Item] {item.Id, -10}" + $"|{item.ItemName, -50}" + $"|{item.ItemDescription, -4}" + $"|{item.PlayerName, -5}" + $"|{item.Category, -5}" + $"|{item.GenreName, -5}");
                 }
             }
         }
