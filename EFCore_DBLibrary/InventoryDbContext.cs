@@ -19,6 +19,8 @@ namespace EFCore_DBLibrary
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<GetItemForListingDTO> ItemsForListing { get; set; }
+        public DbSet<AllItemsPipeDelimitedStringDTO> AllItemsOutput { get; set; }
+        public DbSet<GetItemsTotalValueDTO> GetItemsTotalValues {  get; set; }
 
         //пустой конструктор для возможности scaffold базы данных
         public InventoryDbContext() { }
@@ -65,10 +67,35 @@ namespace EFCore_DBLibrary
                 .IsClustered(false);*/
             //base.OnModelCreating(modelBuilder);
 
+            //Настраиваем DTO
             modelBuilder.Entity<GetItemForListingDTO>(x =>
             {
                 x.HasNoKey();
                 x.ToView("ItemsForListing");
+            });
+            modelBuilder.Entity<AllItemsPipeDelimitedStringDTO>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("AllItemsOutput");
+            });
+            modelBuilder.Entity<GetItemsTotalValueDTO>(x =>
+            {
+                x.HasNoKey();
+                x.ToView("GetItemsTotalValues");
+            });
+
+            //делаем значения по умолчанию для Жанра
+            //так как этот код будет выполняться при каждой миграции, то лучше не использовать всякие случайные числа и тд
+            var genreCreateDate = new DateTime(2023, 01, 01);
+            modelBuilder.Entity<Genre>(x =>
+            {
+                x.HasData(
+                    new Genre() { Id = 1, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Fantasy"},
+                    new Genre() { Id = 2, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Sci/Fi" },
+                    new Genre() { Id = 3, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Horror" },
+                    new Genre() { Id = 4, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Comedy" },
+                    new Genre() { Id = 5, CreatedDate = genreCreateDate, IsActive = true, IsDeleted = false, Name = "Drama" }
+                    );
             });
         }
         public override int SaveChanges()

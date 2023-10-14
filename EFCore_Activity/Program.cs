@@ -2,6 +2,7 @@
 using EFCore_DBLibrary.Migrations;
 using InventoryHelpers;
 using InventoryModels;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -20,10 +21,12 @@ namespace EFCore_Activity
         {
             BuildOptions();
             //DeleteAllItems();
-            EnsureItems();
-            UpdateItems();
+            //EnsureItems();
+            //UpdateItems();
             ListInventory();
             GetItemsForListing();
+            GetAllActiveItemsAsPipeDelimitedString();
+            GetItemsTotalValues();
         }
         static void BuildOptions()
         {
@@ -104,6 +107,29 @@ namespace EFCore_Activity
                     }
 
                     Console.WriteLine(output);
+                }
+            }
+        }
+        private static void GetAllActiveItemsAsPipeDelimitedString()
+        {
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                var isActiveParm = new SqlParameter("IsActive", 1);
+                var result = db.AllItemsOutput
+                    .FromSqlRaw("SELECT [dbo].[ItemNamesPipeDelimitedString] (@IsActive) AllItems", isActiveParm)
+                    .FirstOrDefault();
+                Console.WriteLine($"All active Items: {result.AllItems}");
+            }
+        }
+        private static void GetItemsTotalValues()
+        {
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                var isActiveParm = new SqlParameter("IsActive", 1);
+                var result = db.GetItemsTotalValues.FromSqlRaw("SELECT * FROM [dbo].[GetItemsTotalValue] (@IsActive)", isActiveParm).ToList();
+                foreach (var item in result)
+                {
+                    Console.WriteLine($"New Item] {item.Id, -10}" + $" | {item.Name, -50}" + $" | {item.Quantity, -4}" + $" | {item.TotalValue, -5}");
                 }
             }
         }

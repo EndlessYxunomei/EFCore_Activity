@@ -4,6 +4,7 @@ using EFCore_DBLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFCore_DBLibrary.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    partial class InventoryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231014044243_createFunction_GetItemsTotalValue")]
+    partial class createFunction_GetItemsTotalValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "7.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -57,7 +60,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("InventoryModels.CategoryDetail", b =>
@@ -77,7 +80,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryDetails", (string)null);
+                    b.ToTable("CategoryDetails");
                 });
 
             modelBuilder.Entity("InventoryModels.DTOs.AllItemsPipeDelimitedStringDTO", b =>
@@ -116,31 +119,6 @@ namespace EFCore_DBLibrary.Migrations
                     b.ToView("ItemsForListing", (string)null);
                 });
 
-            modelBuilder.Entity("InventoryModels.DTOs.GetItemsTotalValueDTO", b =>
-                {
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("TotalValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("GetItemsTotalValues", (string)null);
-                });
-
             modelBuilder.Entity("InventoryModels.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -176,49 +154,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Fantasy"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Sci/Fi"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Horror"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Comedy"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Drama"
-                        });
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("InventoryModels.Item", b =>
@@ -288,7 +224,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("InventoryModels.ItemGenre", b =>
@@ -312,7 +248,7 @@ namespace EFCore_DBLibrary.Migrations
                     b.HasIndex("ItemId", "GenreId")
                         .IsUnique();
 
-                    b.ToTable("ItemGenres", (string)null);
+                    b.ToTable("ItemGenres");
                 });
 
             modelBuilder.Entity("InventoryModels.Player", b =>
@@ -355,7 +291,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Player", (string)null);
+                    b.ToTable("Player");
                 });
 
             modelBuilder.Entity("ItemPlayers", b =>
@@ -370,7 +306,7 @@ namespace EFCore_DBLibrary.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("ItemPlayers", (string)null);
+                    b.ToTable("ItemPlayers");
                 });
 
             modelBuilder.Entity("InventoryModels.CategoryDetail", b =>
