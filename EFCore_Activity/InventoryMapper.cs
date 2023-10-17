@@ -19,7 +19,19 @@ namespace EFCore_Activity
         private void CreateMaps()
         {
             CreateMap<Item, ItemDTO>();
-            CreateMap<Category, CategoryDTO>();
+            CreateMap<CategoryDetail, CategoryDetailDTO>()
+                .ForMember(x => x.Color, opt => opt.MapFrom(y => y.ColorName))
+                .ForMember(x => x.Value, opt => opt.MapFrom(y => y.ColorValue))
+                .ReverseMap()
+                .ForMember(y => y.ColorValue, opt => opt.MapFrom(x => x.Value))
+                .ForMember(y => y.ColorName, opt => opt.MapFrom(x => x.Color));
+            CreateMap<Category, CategoryDTO>()
+                .ForMember(x => x.Category, opt => opt.MapFrom(y => y.Name))
+                //ВАЖНО БЛЯДЬ!!!!!
+                //Я НЕ ЗНАЮ НАХРЕН НУЖЕН ЭТОТ АВТОМЕПЕР ЕСЛИ ОН НЕ МОЖЕНТ САМ БЛЯДЬ ПОНЯТЬ ЧТО ДЛЯ ДТОШКИ НУЖНО БРАТЬ ОБЪЕКТ КОТОРЫЙ УЖЕ БЫЛ УКАЗАН РАНЕЕ
+                .ForMember(x => x.CategotyDetail, opt => opt.MapFrom(y => y.CategoryDetail))
+                .ReverseMap()
+                .ForMember(y => y.Name, opt => opt.MapFrom(x => x.Category));
         }
     }
 }

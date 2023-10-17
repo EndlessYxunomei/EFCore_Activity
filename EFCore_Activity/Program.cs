@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using EFCore_DBLibrary;
 using EFCore_DBLibrary.Migrations;
 using InventoryHelpers;
@@ -34,10 +35,13 @@ namespace EFCore_Activity
             //EnsureItems();
             //UpdateItems();
             ListInventory();
-            GetItemsForListing();
-            GetAllActiveItemsAsPipeDelimitedString();
-            GetItemsTotalValues();
-            GetFullItemDetails();
+            ListInventoryWithProjections();
+            ListCategoriesAndColors();
+            //GetItemsForListing();
+            //GetItemsForListingLinq();
+            //GetAllActiveItemsAsPipeDelimitedString();
+            //GetItemsTotalValues();
+            //GetFullItemDetails();
         }
         static void BuildOptions()
         {
@@ -86,10 +90,42 @@ namespace EFCore_Activity
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
                 var items = db.Items.OrderBy(x => x.Name).ToList();
-                //внедряем использование автомапера
+                //внедряем использование автомапера c ручным меппингом после выпонения запроса
                 var result = _mapper.Map<List<Item>,List<ItemDTO>>(items);
                 result.ForEach(x => Console.WriteLine($"New item: {x}"));
                 //items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));
+            }
+        }
+        private static void ListInventoryWithProjections()
+        {
+            //автомапер с проекцией прямо в запросе
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                var iems = db.Items
+                    .OrderBy(x => x.Name)
+                    .ProjectTo<ItemDTO>(_mapper.ConfigurationProvider)
+                    .ToList();
+                iems.ForEach(x => Console.WriteLine($"New Item: {x}"));
+            }
+        }
+        private static void ListCategoriesAndColors()
+        {
+            //проверка мапинга с изменеными названиями
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                /*var results = db.Categories
+                    .Include(x => x.CategoryDetail)
+                    .ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider).ToList();*/
+
+                var results = db.Categories
+                .Include(x => x.CategoryDetail)
+                //.Select(x => x.CategoryDetail)
+                .ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider).ToList();
+
+                foreach (var c in results)
+                {
+                    Console.WriteLine($"Category [{c.Category}] is {c.CategotyDetail?.Color}");
+                }
             }
         }
         private static void DeleteAllItems()
@@ -132,6 +168,48 @@ namespace EFCore_Activity
                     }
 
                     Console.WriteLine(output);
+                }
+            }
+        }
+        private static void GetItemsForListingLinq()
+        {
+            var minDateValue = new DateTime(2021, 1, 1);
+            var maxDateValue = new DateTime(2024, 1, 1);
+            using (var db = new InventoryDbContext(_optionsBuilder.Options))
+            {
+                //замена сохраненной процедуре выше чрез линк и анонимный класс
+                /*var results = db.Items.Select(x => new
+                {
+                    x.CreatedDate,
+                    CategoryName = x.Category.Name,
+                    x.Description,
+                    x.IsActive,
+                    x.IsDeleted,
+                    x.Name,
+                    x.Notes
+                }).Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
+                .OrderBy(y => y.CategoryName).ThenBy(z => z.Name).ToList();
+                foreach (var item in results)
+                {
+                    Console.WriteLine($"ITEM {item.CategoryName}| {item.Name} - {item.Description}");
+                }*/
+                //Вариант с ДТОшкой
+                var results = db.Items.Select(x => new ItemDTO
+                {
+                    CreatedDate = x.CreatedDate,
+                    CategoryName = x.Category.Name,
+                    Description = x.Description,
+                    IsActive = x.IsActive,
+                    IsDeleted = x.IsDeleted,
+                    Name = x.Name,
+                    Notes = x.Notes,
+                    CategoryId = x.Category.Id,
+                    Id = x.Id
+                }).Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
+.OrderBy(y => y.CategoryName).ThenBy(z => z.Name).ToList();
+                foreach (var itemDTO in results)
+                {
+                    Console.WriteLine(itemDTO);
                 }
             }
         }

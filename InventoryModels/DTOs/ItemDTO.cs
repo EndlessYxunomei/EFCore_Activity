@@ -12,9 +12,14 @@ namespace InventoryModels.DTOs
         public string? Name { get; set; }
         public string? Description { get; set; }
         public int CategoryId { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
+        public string? Notes { get; set; }
+        public string? CategoryName { get; set; }
+        public DateTime CreatedDate { get; set; }
         public override string ToString()
         {
-            return $"{Name,-25} | {Description}";
+            return $"ITEM {Name,-25}] {Description} has categoty: {CategoryName}";
         }
 
     }

@@ -16,10 +16,10 @@ namespace InventoryModels
         public int Id { get; set; }
         [Required]
         [StringLength(InventoryModelConstants.MAX_COLORVALUE_LENGTH)]
-        public string ColorValue { get; set; }
+        public required string ColorValue { get; set; }
         [Required]
         [StringLength(InventoryModelConstants.MAX_COLORNAME_LENGTH)]
-        public string ColorName { get; set; }
+        public required string ColorName { get; set; }
         public virtual Category Category { get; set; }
     }
 }
