@@ -1,17 +1,26 @@
-﻿using EFCore_DBLibrary;
+﻿using AutoMapper;
+using EFCore_DBLibrary;
 using EFCore_DBLibrary.Migrations;
 using InventoryHelpers;
 using InventoryModels;
+using InventoryModels.DTOs;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EFCore_Activity
 {
     public class Program
     {
+        //конфигурация базы данных
         private static IConfigurationRoot _configuration;
         private static DbContextOptionsBuilder<InventoryDbContext> _optionsBuilder;
+
+        //Конфигурация автомапера
+        private static MapperConfiguration _mapperConfig;
+        private static IMapper _mapper;
+        private static IServiceProvider _serviceProvider;
 
         //пока нет нормальных пользователей заменяем их константой
         private const string _systemUserId = "2df28110-93d0-427d-9207-d55dbca680fa";
@@ -20,6 +29,7 @@ namespace EFCore_Activity
         static void Main(string[] args)
         {
             BuildOptions();
+            BuildMapper();
             //DeleteAllItems();
             //EnsureItems();
             //UpdateItems();
@@ -34,6 +44,17 @@ namespace EFCore_Activity
             _configuration = ConfigurationBuilderSingleton.ConfigurationRoot;
             _optionsBuilder = new DbContextOptionsBuilder<InventoryDbContext>();
             _optionsBuilder.UseSqlServer(_configuration.GetConnectionString("InventoryManager"));
+        }
+        static void BuildMapper()
+        {
+            //Встариваем сервис автомапера
+            var services = new ServiceCollection();
+            services.AddAutoMapper(typeof(InventoryMapper));
+            _serviceProvider = services.BuildServiceProvider();
+            //настраиваем автомапер
+            _mapperConfig = new MapperConfiguration(cfg => { cfg.AddProfile<InventoryMapper>(); });
+            _mapperConfig.AssertConfigurationIsValid();
+            _mapper = _mapperConfig.CreateMapper();
         }
         static void EnsureItems()
         {
@@ -65,7 +86,10 @@ namespace EFCore_Activity
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
                 var items = db.Items.OrderBy(x => x.Name).ToList();
-                items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));
+                //внедряем использование автомапера
+                var result = _mapper.Map<List<Item>,List<ItemDTO>>(items);
+                result.ForEach(x => Console.WriteLine($"New item: {x}"));
+                //items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));
             }
         }
         private static void DeleteAllItems()
