@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryModels
 {
@@ -6,12 +8,14 @@ namespace InventoryModels
     {
         [Required]
         [StringLength(InventoryModelConstants.MAX_NAME_LENGTH)]
+        [Column(TypeName = "VARCHAR")]
         public required string Name { get; set; }
         [Range(InventoryModelConstants.MINIMUM_QUANTITY, InventoryModelConstants.MAXIMUM_QUANTITY)]
         public int Quantity { get; set; }
-        [StringLength(InventoryModelConstants.MAX_DESCRIPTION_LENGTH)]
         [Required]
-        public string? Description { get; set; }
+        [StringLength(InventoryModelConstants.MAX_DESCRIPTION_LENGTH)]
+        [Column(TypeName = "VARCHAR")]
+        public required string Description { get; set; }
         [StringLength(InventoryModelConstants.MAX_NOTES_LENGTH, MinimumLength = 10)]
         public string? Notes { get; set; }
         public bool IsOnSale { get; set; }

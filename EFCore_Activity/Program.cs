@@ -36,12 +36,12 @@ namespace EFCore_Activity
             //UpdateItems();
             ListInventory();
             ListInventoryWithProjections();
-            ListCategoriesAndColors();
+            //ListCategoriesAndColors();
             //GetItemsForListing();
-            //GetItemsForListingLinq();
-            //GetAllActiveItemsAsPipeDelimitedString();
+            GetItemsForListingLinq();
+            GetAllActiveItemsAsPipeDelimitedString();
             //GetItemsTotalValues();
-            //GetFullItemDetails();
+            GetFullItemDetails();
         }
         static void BuildOptions()
         {
@@ -89,11 +89,19 @@ namespace EFCore_Activity
         {
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                var items = db.Items.OrderBy(x => x.Name).ToList();
+                //НЕ РАБОТАЕТ КАК В КНИГЕ ХОТЬ УБЕЙ
+                var result = db.Items.ToList().OrderBy(x => x.Name).Take(20)
+                    .Select(x => new ItemDTO
+                    {
+                        Name = x.Name,
+                        Description = x.Description
+                    }).ToList();
+                result.ForEach(x => Console.WriteLine($"New item: {x}"));
+                /*var items = db.Items.OrderBy(x => x.Name).ToList();
                 //внедряем использование автомапера c ручным меппингом после выпонения запроса
                 var result = _mapper.Map<List<Item>,List<ItemDTO>>(items);
                 result.ForEach(x => Console.WriteLine($"New item: {x}"));
-                //items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));
+                //items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));*/
             }
         }
         private static void ListInventoryWithProjections()
@@ -102,10 +110,13 @@ namespace EFCore_Activity
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
                 var iems = db.Items
-                    .OrderBy(x => x.Name)
+                    //отключили из-за шифрования
+                    //.OrderBy(x => x.Name)
                     .ProjectTo<ItemDTO>(_mapper.ConfigurationProvider)
                     .ToList();
-                iems.ForEach(x => Console.WriteLine($"New Item: {x}"));
+                //iems.ForEach(x => Console.WriteLine($"New Item: {x}"));
+                //из-за шифрования приходится делать сортировки и пр после получения всех данных с сревера и дешифровки - УДАР ПО ПРОИЗВОДИТЕЛЬНОСТИ
+                iems.OrderBy(x => x.Name).ToList().ForEach(x => Console.WriteLine($"New Item: {x}"));
             }
         }
         private static void ListCategoriesAndColors()
@@ -194,7 +205,7 @@ namespace EFCore_Activity
                     Console.WriteLine($"ITEM {item.CategoryName}| {item.Name} - {item.Description}");
                 }*/
                 //Вариант с ДТОшкой
-                var results = db.Items.Select(x => new ItemDTO
+                /*var results = db.Items.Select(x => new ItemDTO
                 {
                     CreatedDate = x.CreatedDate,
                     CategoryName = x.Category.Name,
@@ -210,6 +221,25 @@ namespace EFCore_Activity
                 foreach (var itemDTO in results)
                 {
                     Console.WriteLine(itemDTO);
+                }*/
+                //Вариант для шифрования
+                var results = db.Items.Include(x => x.Category).ToList().Select(x => new ItemDTO
+                {
+                    CreatedDate = x.CreatedDate,
+                    CategoryName = x.Category.Name,
+                    Description = x.Description,
+                    IsActive = x.IsActive,
+                    IsDeleted = x.IsDeleted,
+                    Name = x.Name,
+                    Notes = x.Notes,
+                    CategoryId = x.Category.Id,
+                    Id = x.Id
+                }).Where(x => x.CreatedDate >= minDateValue && x.CreatedDate <= maxDateValue)
+                .OrderBy(y => y.CategoryName).ThenBy(z => z.Name)
+                .ToList();
+                foreach (var itemDTO in results)
+                {
+                    Console.WriteLine(itemDTO);
                 }
             }
         }
@@ -217,11 +247,14 @@ namespace EFCore_Activity
         {
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                var isActiveParm = new SqlParameter("IsActive", 1);
+                /*var isActiveParm = new SqlParameter("IsActive", 1);
                 var result = db.AllItemsOutput
                     .FromSqlRaw("SELECT [dbo].[ItemNamesPipeDelimitedString] (@IsActive) AllItems", isActiveParm)
                     .FirstOrDefault();
-                Console.WriteLine($"All active Items: {result.AllItems}");
+                Console.WriteLine($"All active Items: {result.AllItems}");*/
+                var result = db.Items.Where(x => x.IsActive).ToList();
+                var pipeDelimitedString = string.Join("|", result);
+                Console.WriteLine($"All active Items: {pipeDelimitedString}");
             }
         }
         private static void GetItemsTotalValues()
@@ -240,7 +273,9 @@ namespace EFCore_Activity
         {
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                var result = db.FullItemsDetailDtos.FromSqlRaw("SELECT * FROM [dbo].[vwFullItemsDetails]").ToList();
+                //var result = db.FullItemsDetailDtos.FromSqlRaw("SELECT * FROM [dbo].[vwFullItemsDetails]").ToList();
+                var result = db.FullItemsDetailDtos.FromSqlRaw("SELECT * FROM [dbo].[vwFullItemsDetails]").ToList()
+                    .OrderBy(x => x.ItemName).ThenBy(x => x.GenreName).ThenBy(x => x.Category).ThenBy(x => x.PlayerName);
                 foreach (var item in result)
                 {
                     Console.WriteLine($"New Item] {item.Id, -10}" + $"|{item.ItemName, -50}" + $"|{item.ItemDescription, -4}" + $"|{item.PlayerName, -5}" + $"|{item.Category, -5}" + $"|{item.GenreName, -5}");
