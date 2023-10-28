@@ -28,6 +28,8 @@ namespace EFCore_Activity
         private static IItemsService _itemsService;
         private static ICategoriesService _categoriesService;
 
+        private static List<CategoryDTO> _categories;
+
         //пока нет нормальных пользователей заменяем их константой
         private const string _systemUserId = "2df28110-93d0-427d-9207-d55dbca680fa";
         private const string _loggedInUserID = "e2eb8989-a81a-4151-8e86-eb95-a7961da2";
@@ -49,8 +51,42 @@ namespace EFCore_Activity
                 GetFullItemDetails();
                 GetItemsForListingLinq();
                 ListCategoriesAndColors();
+
+                Console.WriteLine("Would you like to create items?");
+                var createItems = Console.ReadLine().StartsWith("y",StringComparison.OrdinalIgnoreCase);
+                if (createItems)
+                {
+                    Console.WriteLine("Adding new Item(s)");
+                    CreateMultipleItems();
+                    Console.WriteLine("Items added");
+                    var inventory = _itemsService.GetItems();
+                    inventory.ForEach(x => Console.WriteLine($"Item: {x}"));
+                }
+
+                Console.WriteLine("Would you like to update items?");
+                var updateItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+                if (updateItems)
+                {
+                    Console.WriteLine("Updating new Item(s)");
+                    UpdateMultipleItems();
+                    Console.WriteLine("Items updated");
+                    var inventory2 = _itemsService.GetItems();
+                    inventory2.ForEach(x => Console.WriteLine($"Item: {x}"));
+                }
+
+                Console.WriteLine("Would you like to delete items?");
+                var deteteItems = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+                if (deteteItems)
+                {
+                    Console.WriteLine("Deleting new Item(s)");
+                    DeleteMultipleItems();
+                    Console.WriteLine("Items deleted");
+                    var inventory3 = _itemsService.GetItems();
+                    inventory3.ForEach(x => Console.WriteLine($"Item: {x}"));
+                }
             }
 
+            Console.WriteLine("Program complete");
             //DeleteAllItems();
             //EnsureItems();
             //UpdateItems();
@@ -64,6 +100,174 @@ namespace EFCore_Activity
             //GetItemsTotalValues();
             //GetFullItemDetails();
         }
+
+        //GRUD
+        private static void DeleteMultipleItems()
+        {
+            Console.WriteLine("Wouid you like to delete items as a batch?");
+            bool batchDelete = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+            var allItems = new List<int>();
+            bool deleteAnother = true;
+            while (deleteAnother == true)
+            {
+                Console.WriteLine("Items");
+                Console.WriteLine("Enter te ID number to delete");
+                Console.WriteLine("************************************************");
+                var items = _itemsService.GetItems();
+                items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
+                Console.WriteLine("************************************************");
+                if (batchDelete && allItems.Any())
+                {
+                    Console.WriteLine("Items scheduled for delete");
+                    allItems.ForEach(x => Console.Write($"{x},"));
+                    Console.WriteLine();
+                    Console.WriteLine("************************************************");
+                }
+                int id = 0;
+                if (int.TryParse(Console.ReadLine(), out id))
+                {
+                    var itemMach = items.FirstOrDefault(x => x.Id == id);
+                    if (itemMach != null)
+                    {
+                        if (batchDelete)
+                        {
+                            if (!allItems.Contains(itemMach.Id))
+                            {
+                                allItems.Add(itemMach.Id);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Are you sure you want to delete the item {itemMach.Id}-{itemMach.Name}");
+                            if (Console.ReadLine().StartsWith("y",StringComparison.OrdinalIgnoreCase))
+                            {
+                                _itemsService.DeleteItem(itemMach.Id);
+                                Console.WriteLine("Item deleted");
+                            }
+                        }
+                    }
+                }
+                Console.WriteLine("Wouid you like to delete another item?");
+                deleteAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+                if (batchDelete && !deleteAnother)
+                {
+                    Console.WriteLine("Are you sure you want to delete following items: ");
+                    allItems.ForEach(x => Console.Write($"{x},"));
+                    Console.WriteLine();
+                    if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _itemsService.DeleteItems(allItems);
+                        Console.WriteLine("Items deleted");
+                    }
+                }
+            }
+        }
+        private static void UpdateMultipleItems()
+        {
+            Console.WriteLine("Wouid you like to update items as a batch?");
+            bool batchUpdate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+            var allItems = new List<CreateOrUpdateItemDTO>();
+            bool updateAnother = true;
+            while (updateAnother == true)
+            {
+                Console.WriteLine("Items");
+                Console.WriteLine("Enter te ID number to update");
+                Console.WriteLine("************************************************");
+                var items = _itemsService.GetItems();
+                items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
+                Console.WriteLine("************************************************");
+                int id = 0;
+                if (int.TryParse(Console.ReadLine(), out id))
+                {
+                    var itemMatch = items.FirstOrDefault(x => x.Id == id);
+                    if (itemMatch != null)
+                    {
+                        var updItem = _mapper.Map<CreateOrUpdateItemDTO>(_mapper.Map<Item>(itemMatch));
+                        Console.WriteLine("Enter the new name [leave blank to keep existing]");
+                        var newName = Console.ReadLine();
+                        updItem.Name = !string.IsNullOrWhiteSpace(newName) ? newName : updItem.Name;
+                        Console.WriteLine("Enter the new description [leave blank to keep existing]");
+                        var newDesc = Console.ReadLine();
+                        updItem.Description = !string.IsNullOrWhiteSpace(newDesc) ? newDesc : updItem.Description;
+                        Console.WriteLine("Enter the new notes [leave blank to keep existing]");
+                        var newNotes = Console.ReadLine();
+                        updItem.Notes = !string.IsNullOrWhiteSpace(newNotes) ? newNotes : updItem.Notes;
+                        Console.WriteLine("Toggle item Active Status? [y/n]");
+                        var toggleActive = Console.ReadLine().Substring(0, 1).Equals("y", StringComparison.OrdinalIgnoreCase);
+                        if (toggleActive)
+                        {
+                            updItem.IsActive = !updItem.IsActive;
+                        }
+                        Console.WriteLine("Enter the Category [B]ooks, [M]ovies, [G]ames, or [N]o Change");
+                        var userChoise = Console.ReadLine().Substring(0, 1).ToUpper();
+                        updItem.CategoryId = userChoise.Equals("N",StringComparison.OrdinalIgnoreCase) ? itemMatch.CategoryId : GetCategoryId(userChoise);
+                        if (!batchUpdate)
+                        {
+                            _itemsService.UpsertItem(updItem);
+                        }
+                        else
+                        {
+                            allItems.Add(updItem);
+                        }
+                    }
+                }
+                Console.WriteLine("Wouid you like to update another?");
+                updateAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+                if (batchUpdate && !updateAnother)
+                {
+                    _itemsService.UpsertItems(allItems);
+                }
+            }
+        }
+        private static void CreateMultipleItems()
+        {
+            Console.WriteLine("Wouid you like to create items as a batch?");
+            bool batchCreate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+            var allItems = new List<CreateOrUpdateItemDTO>();
+            bool createAnother = true;
+            while (createAnother == true)
+            {
+                var newItem = new CreateOrUpdateItemDTO();
+                Console.WriteLine("Creating a new item");
+                Console.WriteLine("Please enter the name");
+                newItem.Name = Console.ReadLine();
+                Console.WriteLine("Please enter the description");
+                newItem.Description = Console.ReadLine();
+                Console.WriteLine("Please enter the notes");
+                newItem.Notes = Console.ReadLine();
+                Console.WriteLine("Please enter the Category [B]ooks, [M]ovies, [G]ames");
+                newItem.CategoryId = GetCategoryId(Console.ReadLine().Substring(0,1).ToUpper());
+                if (!batchCreate)
+                {
+                    _itemsService.UpsertItem(newItem);
+                }
+                else
+                {
+                    allItems.Add(newItem);
+                }
+                Console.WriteLine("Wouid you like to create another item?");
+                createAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
+                if (batchCreate && !createAnother)
+                {
+                    _itemsService.UpsertItems(allItems);
+                }
+            }
+        }
+        private static int GetCategoryId(string input)
+        {
+            switch (input)
+            {
+                case "B":
+                    return _categories.FirstOrDefault(x => x.Category.ToLower().Equals("books"))?.Id ?? -1;
+                case "M":
+                    return _categories.FirstOrDefault(x => x.Category.ToLower().Equals("movies"))?.Id ?? -1;
+                case "G":
+                    return _categories.FirstOrDefault(x => x.Category.ToLower().Equals("games"))?.Id ?? -1;
+                default:
+                    return -1;
+            }
+        }
+
         //методы для настройки базы данный и автомапера
         static void BuildOptions()
         {
@@ -179,6 +383,8 @@ namespace EFCore_Activity
             {
                 Console.WriteLine($"Category [{c.Category}] is {c.CategotyDetail?.Color}");
             }
+
+            _categories = results;
 
             //изначальная версия
             /*using (var db = new InventoryDbContext(_optionsBuilder.Options))

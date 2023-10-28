@@ -6,6 +6,7 @@ using InventoryModels.DTOs;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Transactions;
 
 namespace InventoryDatabaseLayer
 {
@@ -46,7 +47,6 @@ namespace InventoryDatabaseLayer
                 .ToList();
             return items;
         }
-
         public List<GetItemForListingDTO> GetItemsForListingFromProcedure()
         {
             return _context.ItemsForListing.FromSqlRaw("EXECUTE dbo.GetItemsForListing").ToList();
@@ -75,7 +75,6 @@ namespace InventoryDatabaseLayer
             }
             return CreateItem(item);
         }
-
         private int CreateItem(Item item)
         {
             _context.Items.Add(item);
@@ -85,7 +84,6 @@ namespace InventoryDatabaseLayer
             if (newItem == null) { throw new Exception("Could not Create the item as expected"); }
             return newItem.Id;
         }
-
         private int UpdateItem(Item item)
         {
             var dbItem = _context.Items
@@ -117,10 +115,10 @@ namespace InventoryDatabaseLayer
             _context.SaveChanges();
             return item.Id;
         }
-
         public void UpsertItems(List<Item> items)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
+            //using (var transaction = _context.Database.BeginTransaction())
             {
                 try
                 {
@@ -129,13 +127,14 @@ namespace InventoryDatabaseLayer
                         var success = UpsertItem(item) > 0;
                         if (!success) { throw new Exception($"Error saving the item {item.Name}"); }
                     }
-                    transaction.Commit();
+                    scope.Complete();
+                   // transaction.Commit();
                 }
                 catch (Exception ex)
                 {
                     //Log the exception
                     Debug.WriteLine(ex.ToString());
-                    transaction.Rollback();
+                    //transaction.Rollback();
                     throw;
                 }
             }
@@ -149,7 +148,8 @@ namespace InventoryDatabaseLayer
         }
         public void DeleteItems(List<int> itemIds)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using (var scope = new TransactionScope (TransactionScopeOption.Required, new TransactionOptions { IsolationLevel= IsolationLevel.ReadUncommitted }))
+            //using (var transaction = _context.Database.BeginTransaction())
             {
                 try
                 {
@@ -157,14 +157,16 @@ namespace InventoryDatabaseLayer
                     {
                         DeleteItem(itemId);
                     }
-                    transaction.Commit();
+                    scope.Complete();
+                    //transaction.Commit();
                 }
                 catch (Exception ex)
                 {
                     //Log the exception
                     Debug.WriteLine(ex.ToString());
-                    transaction.Rollback();
-                    throw ex;
+                    throw;
+                    //transaction.Rollback();
+                    //throw ex;
                 }
             }
         }
