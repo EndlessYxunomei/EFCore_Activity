@@ -15,5 +15,10 @@ namespace InventoryBusinessLayer
         List<GetItemsTotalValueDTO> GetItemsTotalValues(bool isActive);
         string GetAllItemsPipeDelimitedString();
         List<FullItemDetailDTO> GetItemsWithGenresAndCategories();
+
+        int UpsertItem(CreateOrUpdateItemDTO item);
+        void UpsertItems(List<CreateOrUpdateItemDTO> items);
+        void DeleteItem(int id);
+        void DeleteItems(List<int> itemIds);
     }
 }

@@ -18,7 +18,7 @@ namespace EFCore_Activity
         }
         private void CreateMaps()
         {
-            CreateMap<Item, ItemDTO>();
+            CreateMap<Item, ItemDTO>().ReverseMap();
             CreateMap<CategoryDetail, CategoryDetailDTO>()
                 .ForMember(x => x.Color, opt => opt.MapFrom(y => y.ColorName))
                 .ForMember(x => x.Value, opt => opt.MapFrom(y => y.ColorValue))
@@ -32,6 +32,9 @@ namespace EFCore_Activity
                 .ForMember(x => x.CategotyDetail, opt => opt.MapFrom(y => y.CategoryDetail))
                 .ReverseMap()
                 .ForMember(y => y.Name, opt => opt.MapFrom(x => x.Category));
+            CreateMap<Item,CreateOrUpdateItemDTO>()
+                .ReverseMap()
+                .ForMember(x => x.Category, opt => opt.Ignore());
         }
     }
 }
