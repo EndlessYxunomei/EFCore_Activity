@@ -10,13 +10,19 @@ namespace InventoryBusinessLayer
     {
         private readonly IItemsRepo _dbRepo;
         private readonly IMapper _mapper;
+
+        //конструктор зависимый от контекста (слишком жесткая связь)
         public ItemsService(InventoryDbContext context, IMapper mapper)
         {
             _dbRepo = new ItemsRepo(context, mapper);
             _mapper = mapper;
         }
-
-
+        //конструктор зависимый от репозитория (так лучше и для тестов подойдёт)
+        public ItemsService(IItemsRepo dbRepo, IMapper mapper)
+        {
+            _dbRepo = dbRepo;
+            _mapper = mapper;
+        }   
 
         public string GetAllItemsPipeDelimitedString()
         {
