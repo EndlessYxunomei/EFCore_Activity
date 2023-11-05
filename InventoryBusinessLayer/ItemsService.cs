@@ -24,7 +24,7 @@ namespace InventoryBusinessLayer
             _mapper = mapper;
         }   
 
-        public string GetAllItemsPipeDelimitedString()
+        /*public string GetAllItemsPipeDelimitedString()
         {
             var items = GetItems();
             return string.Join('|', items);
@@ -84,6 +84,73 @@ namespace InventoryBusinessLayer
             try
             {
                 _dbRepo.DeleteItems(itemIds);
+            }
+            catch (Exception ex)
+            {
+                //TODO: better logging
+                Console.WriteLine($"The transaction has failed: {ex.Message}");
+            }
+        }*/
+
+        public async Task<string> GetAllItemsPipeDelimitedString()
+        {
+            var items = await GetItems();
+            return string.Join('|', items);
+        }
+        public async Task<List<ItemDTO>> GetItems()
+        {
+            return _mapper.Map<List<ItemDTO>>(await _dbRepo.GetItems());
+        }
+        public async Task<List<ItemDTO>> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue)
+        {
+            return await _dbRepo.GetItemsByDateRange(minDateValue, maxDateValue);
+        }
+        public async Task<List<GetItemForListingDTO>> GetItemsForListingFromProcedure()
+        {
+            return await _dbRepo.GetItemsForListingFromProcedure();
+        }
+        public async Task<List<GetItemsTotalValueDTO>> GetItemsTotalValues(bool isActive)
+        {
+            return await _dbRepo.GetItemsTotalValues(isActive);
+        }
+        public async Task<List<FullItemDetailDTO>> GetItemsWithGenresAndCategories()
+        {
+            return await _dbRepo.GetItemsWithGenresAndCategories();
+        }
+
+        public async Task<int> UpsertItem(CreateOrUpdateItemDTO item)
+        {
+            if (item.CategoryId <= 0)
+            {
+                throw new ArgumentException("Please set category id before insert or update");
+            }
+            return await _dbRepo.UpsertItem(_mapper.Map<Item>(item));
+        }
+        public async Task UpsertItems(List<CreateOrUpdateItemDTO> items)
+        {
+            try
+            {
+                await _dbRepo.UpsertItems(_mapper.Map<List<Item>>(items));
+            }
+            catch (Exception ex)
+            {
+                //TODO: better logging
+                Console.WriteLine($"The transaction has failed: {ex.Message}");
+            }
+        }
+        public async Task DeleteItem(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentException("Please set a valid item id before deleting");
+            }
+            await _dbRepo.DeleteItem(id);
+        }
+        public async Task DeleteItems(List<int> itemIds)
+        {
+            try
+            {
+                await _dbRepo.DeleteItems(itemIds);
             }
             catch (Exception ex)
             {

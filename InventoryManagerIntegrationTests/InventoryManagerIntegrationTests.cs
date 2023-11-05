@@ -60,7 +60,7 @@ namespace InventoryManagerIntegrationTests
         }
         
         [Fact]
-        public void TestGetItems()
+        public async Task TestGetItems()
         {
             //arrange
             //BuildDefaults();
@@ -68,7 +68,7 @@ namespace InventoryManagerIntegrationTests
             {
                 //act
                 _dbRepo = new ItemsRepo(context, _mapper);
-                var items = _dbRepo.GetItems();
+                var items = await _dbRepo.GetItems();
                 //assert
                 items.ShouldNotBeNull();
                 items.Count.ShouldBe(3);
@@ -89,7 +89,7 @@ namespace InventoryManagerIntegrationTests
         [InlineData(CAT1_NAME, COLOR_BLUE, COLOR_BLUE_VALUE)]
         [InlineData(CAT2_NAME, COLOR_RED, COLOR_RED_VALUE)]
         [InlineData(CAT3_NAME, COLOR_GREEN, COLOR_GREEN_VALUE)]
-        public void TestCategoryColors(string name, string color, string colorValue)
+        public async Task TestCategoryColors(string name, string color, string colorValue)
         {
             //arrange
             //BuildDefaults();
@@ -97,7 +97,7 @@ namespace InventoryManagerIntegrationTests
             {
                 //act
                 var categoriesRepo = new CategoriesRepo(_mapper, contest);
-                var categories = categoriesRepo.ListCategoriesAndDetails();
+                var categories = await categoriesRepo.ListCategoriesAndDetails();
                 //assert
                 categories.ShouldNotBeNull();
                 categories.Count.ShouldBe(3);

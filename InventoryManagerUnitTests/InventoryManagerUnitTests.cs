@@ -44,9 +44,9 @@ namespace InventoryManagerUnitTests
         }
 
         [TestMethod]
-        public void TestGetItems()
+        public async Task TestGetItems()
         {
-            var result = _itemsService.GetItems();
+            var result = await _itemsService.GetItems();
             //методы из пакета Shouldly
             result.ShouldNotBeNull();
             result.Count.ShouldBe(3);
@@ -76,7 +76,8 @@ namespace InventoryManagerUnitTests
             //—ќздаем фальшивые данные, которые будут передаватьс€ модулю дл€ тестировани€ вместо реальной базы данных
             _itemsRepo = new Mock<IItemsRepo>();
             var items = GetItemsTestData();
-            _itemsRepo.Setup(m => m.GetItems()).Returns(items);
+            //_itemsRepo.Setup(m => m.GetItems()).Returns(items);//дл€ синхронки
+            _itemsRepo.Setup(m => m.GetItems()).Returns(Task.FromResult(items));
         }
         private List<Item> GetItemsTestData()
         {

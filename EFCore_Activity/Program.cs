@@ -34,7 +34,7 @@ namespace EFCore_Activity
         private const string _systemUserId = "2df28110-93d0-427d-9207-d55dbca680fa";
         private const string _loggedInUserID = "e2eb8989-a81a-4151-8e86-eb95-a7961da2";
         
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             BuildOptions();
             BuildMapper();
@@ -44,22 +44,22 @@ namespace EFCore_Activity
                 _itemsService = new ItemsService(db, _mapper);
                 _categoriesService = new CategoriesService(db, _mapper);
 
-                ListInventory();
-                GetItemsForListing();
-                GetAllActiveItemsAsPipeDelimitedString();
-                GetItemsTotalValues();
-                GetFullItemDetails();
-                GetItemsForListingLinq();
-                ListCategoriesAndColors();
+                await ListInventory();
+                await GetItemsForListing();
+                await GetAllActiveItemsAsPipeDelimitedString();
+                await GetItemsTotalValues();
+                await GetFullItemDetails();
+                await GetItemsForListingLinq();
+                await ListCategoriesAndColors();
 
                 Console.WriteLine("Would you like to create items?");
                 var createItems = Console.ReadLine().StartsWith("y",StringComparison.OrdinalIgnoreCase);
                 if (createItems)
                 {
                     Console.WriteLine("Adding new Item(s)");
-                    CreateMultipleItems();
+                    await CreateMultipleItems();
                     Console.WriteLine("Items added");
-                    var inventory = _itemsService.GetItems();
+                    var inventory = await _itemsService.GetItems();
                     inventory.ForEach(x => Console.WriteLine($"Item: {x}"));
                 }
 
@@ -68,9 +68,9 @@ namespace EFCore_Activity
                 if (updateItems)
                 {
                     Console.WriteLine("Updating new Item(s)");
-                    UpdateMultipleItems();
+                    await UpdateMultipleItems();
                     Console.WriteLine("Items updated");
-                    var inventory2 = _itemsService.GetItems();
+                    var inventory2 = await _itemsService.GetItems();
                     inventory2.ForEach(x => Console.WriteLine($"Item: {x}"));
                 }
 
@@ -79,9 +79,9 @@ namespace EFCore_Activity
                 if (deteteItems)
                 {
                     Console.WriteLine("Deleting new Item(s)");
-                    DeleteMultipleItems();
+                    await DeleteMultipleItems();
                     Console.WriteLine("Items deleted");
-                    var inventory3 = _itemsService.GetItems();
+                    var inventory3 = await _itemsService.GetItems();
                     inventory3.ForEach(x => Console.WriteLine($"Item: {x}"));
                 }
             }
@@ -102,7 +102,7 @@ namespace EFCore_Activity
         }
 
         //GRUD
-        private static void DeleteMultipleItems()
+        private static async Task DeleteMultipleItems()
         {
             Console.WriteLine("Wouid you like to delete items as a batch?");
             bool batchDelete = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -113,7 +113,7 @@ namespace EFCore_Activity
                 Console.WriteLine("Items");
                 Console.WriteLine("Enter te ID number to delete");
                 Console.WriteLine("************************************************");
-                var items = _itemsService.GetItems();
+                var items = await _itemsService.GetItems();
                 items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
                 Console.WriteLine("************************************************");
                 if (batchDelete && allItems.Any())
@@ -141,7 +141,7 @@ namespace EFCore_Activity
                             Console.WriteLine($"Are you sure you want to delete the item {itemMach.Id}-{itemMach.Name}");
                             if (Console.ReadLine().StartsWith("y",StringComparison.OrdinalIgnoreCase))
                             {
-                                _itemsService.DeleteItem(itemMach.Id);
+                                await _itemsService.DeleteItem(itemMach.Id);
                                 Console.WriteLine("Item deleted");
                             }
                         }
@@ -156,13 +156,13 @@ namespace EFCore_Activity
                     Console.WriteLine();
                     if (Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        _itemsService.DeleteItems(allItems);
+                        await _itemsService.DeleteItems(allItems);
                         Console.WriteLine("Items deleted");
                     }
                 }
             }
         }
-        private static void UpdateMultipleItems()
+        private static async Task UpdateMultipleItems()
         {
             Console.WriteLine("Wouid you like to update items as a batch?");
             bool batchUpdate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -173,7 +173,7 @@ namespace EFCore_Activity
                 Console.WriteLine("Items");
                 Console.WriteLine("Enter te ID number to update");
                 Console.WriteLine("************************************************");
-                var items = _itemsService.GetItems();
+                var items = await _itemsService.GetItems();
                 items.ForEach(x => Console.WriteLine($"ID: {x.Id} | {x.Name}"));
                 Console.WriteLine("************************************************");
                 int id = 0;
@@ -203,7 +203,7 @@ namespace EFCore_Activity
                         updItem.CategoryId = userChoise.Equals("N",StringComparison.OrdinalIgnoreCase) ? itemMatch.CategoryId : GetCategoryId(userChoise);
                         if (!batchUpdate)
                         {
-                            _itemsService.UpsertItem(updItem);
+                            await _itemsService.UpsertItem(updItem);
                         }
                         else
                         {
@@ -215,11 +215,11 @@ namespace EFCore_Activity
                 updateAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
                 if (batchUpdate && !updateAnother)
                 {
-                    _itemsService.UpsertItems(allItems);
+                    await _itemsService.UpsertItems(allItems);
                 }
             }
         }
-        private static void CreateMultipleItems()
+        private static async Task CreateMultipleItems()
         {
             Console.WriteLine("Wouid you like to create items as a batch?");
             bool batchCreate = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
@@ -239,7 +239,7 @@ namespace EFCore_Activity
                 newItem.CategoryId = GetCategoryId(Console.ReadLine().Substring(0,1).ToUpper());
                 if (!batchCreate)
                 {
-                    _itemsService.UpsertItem(newItem);
+                    await _itemsService.UpsertItem(newItem);
                 }
                 else
                 {
@@ -249,7 +249,7 @@ namespace EFCore_Activity
                 createAnother = Console.ReadLine().StartsWith("y", StringComparison.OrdinalIgnoreCase);
                 if (batchCreate && !createAnother)
                 {
-                    _itemsService.UpsertItems(allItems);
+                    await _itemsService.UpsertItems(allItems);
                 }
             }
         }
@@ -338,11 +338,11 @@ namespace EFCore_Activity
         */
 
         //методы для работы с базой
-        private static void ListInventory()
+        private static async Task ListInventory()
         {
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                var result = _itemsService.GetItems();
+                var result = await _itemsService.GetItems();
                 result.ForEach(x => Console.WriteLine($"New item: {x}"));
 
                 //НЕ РАБОТАЕТ КАК В КНИГЕ ХОТЬ УБЕЙ
@@ -361,24 +361,24 @@ namespace EFCore_Activity
                 //items.ForEach(x => Console.WriteLine($"New Item: {x.Name}"));*/
             }
         }
-        private static void ListInventoryWithProjections()
+        private static async Task ListInventoryWithProjections()
         {
             //автомапер с проекцией прямо в запросе
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                var iems = db.Items
+                var iems = await db.Items
                     //отключили из-за шифрования
                     //.OrderBy(x => x.Name)
                     .ProjectTo<ItemDTO>(_mapper.ConfigurationProvider)
-                    .ToList();
+                    .ToListAsync();
                 //iems.ForEach(x => Console.WriteLine($"New Item: {x}"));
                 //из-за шифрования приходится делать сортировки и пр после получения всех данных с сревера и дешифровки - УДАР ПО ПРОИЗВОДИТЕЛЬНОСТИ
                 iems.OrderBy(x => x.Name).ToList().ForEach(x => Console.WriteLine($"New Item: {x}"));
             }
         }
-        private static void ListCategoriesAndColors()
+        private static async Task ListCategoriesAndColors()
         {
-            var results = _categoriesService.ListCategoriesAndDetails();
+            var results = await _categoriesService.ListCategoriesAndDetails();
             foreach (var c in results)
             {
                 Console.WriteLine($"Category [{c.Category}] is {c.CategotyDetail?.Color}");
@@ -411,9 +411,9 @@ namespace EFCore_Activity
                 }
             }*/
         }
-        private static void GetItemsForListing()
+        private static async Task GetItemsForListing()
         {
-            var results = _itemsService.GetItemsForListingFromProcedure();
+            var results = await _itemsService.GetItemsForListingFromProcedure();
             foreach (var item in results)
             {
                 var output = $"ITEM {item.Name}] {item.Description}";
@@ -443,18 +443,23 @@ namespace EFCore_Activity
                 }
             }*/
         }
-        private static void GetItemsForListingLinq()
+        private static async Task GetItemsForListingLinq()
         {
             var minDateValue = new DateTime(2021, 1, 1);
             var maxDateValue = new DateTime(2024, 1, 1);
 
-            var results = _itemsService.GetItemsByDateRange(minDateValue, maxDateValue)
+            var results = await _itemsService.GetItemsByDateRange(minDateValue, maxDateValue);
+            foreach (var itemDto in results.OrderBy(y => y.CategoryName).ThenBy(z => z.Name))
+            {
+                Console.WriteLine(itemDto);
+            }
+            //синхронка
+            /*var results = _itemsService.GetItemsByDateRange(minDateValue, maxDateValue)
                 .OrderBy(y => y.CategoryName).ThenBy(z => z.Name);
             foreach (var itemDto in results)
             {
                 Console.WriteLine(itemDto);
-            }
-
+            }*/
             //замена сохраненной процедуре выше чрез линк и анонимный класс
             /*using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
@@ -518,11 +523,11 @@ namespace EFCore_Activity
                 }
             }*/
         }
-        private static void GetAllActiveItemsAsPipeDelimitedString()
+        private static async Task GetAllActiveItemsAsPipeDelimitedString()
         {
             using (var db = new InventoryDbContext(_optionsBuilder.Options))
             {
-                Console.WriteLine($"All active Items: {_itemsService.GetAllItemsPipeDelimitedString()}");
+                Console.WriteLine($"All active Items: {await _itemsService.GetAllItemsPipeDelimitedString()}");
                 /*var isActiveParm = new SqlParameter("IsActive", 1);
                 var result = db.AllItemsOutput
                     .FromSqlRaw("SELECT [dbo].[ItemNamesPipeDelimitedString] (@IsActive) AllItems", isActiveParm)
@@ -533,9 +538,9 @@ namespace EFCore_Activity
                 Console.WriteLine($"All active Items: {pipeDelimitedString}");*/
             }
         }
-        private static void GetItemsTotalValues()
+        private static async Task GetItemsTotalValues()
         {
-            var results = _itemsService.GetItemsTotalValues(true);
+            var results = await _itemsService.GetItemsTotalValues(true);
             foreach (var item in results)
             {
                 Console.WriteLine($"New Item] {item.Id,-10}" +
@@ -553,9 +558,9 @@ namespace EFCore_Activity
                 }
             }*/
         }
-        private static void GetFullItemDetails()
+        private static async Task GetFullItemDetails()
         {
-            var result = _itemsService.GetItemsWithGenresAndCategories();
+            var result = await _itemsService.GetItemsWithGenresAndCategories();
             foreach (var item in  result)
             {
                 Console.WriteLine($"New Item] {item.Id,-10}" +

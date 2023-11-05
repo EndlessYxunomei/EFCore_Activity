@@ -18,9 +18,9 @@ namespace InventoryBusinessLayer
             _dbRepo = new CategoriesRepo(mapper, context);
         }
 
-        public List<CategoryDTO> ListCategoriesAndDetails()
+        public async Task<List<CategoryDTO>> ListCategoriesAndDetails()
         {
-            return _dbRepo.ListCategoriesAndDetails();
+            return await _dbRepo.ListCategoriesAndDetails();
         }
     }
 }

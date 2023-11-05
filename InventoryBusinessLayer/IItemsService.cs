@@ -9,16 +9,16 @@ namespace InventoryBusinessLayer
 {
     public interface IItemsService
     {
-        List<ItemDTO> GetItems();
-        List<ItemDTO> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue);
-        List<GetItemForListingDTO> GetItemsForListingFromProcedure();
-        List<GetItemsTotalValueDTO> GetItemsTotalValues(bool isActive);
-        string GetAllItemsPipeDelimitedString();
-        List<FullItemDetailDTO> GetItemsWithGenresAndCategories();
+        Task<List<ItemDTO>> GetItems();
+        Task<List<ItemDTO>> GetItemsByDateRange(DateTime minDateValue, DateTime maxDateValue);
+        Task<List<GetItemForListingDTO>> GetItemsForListingFromProcedure();
+        Task<List<GetItemsTotalValueDTO>> GetItemsTotalValues(bool isActive);
+        Task<string> GetAllItemsPipeDelimitedString();
+        Task<List<FullItemDetailDTO>> GetItemsWithGenresAndCategories();
 
-        int UpsertItem(CreateOrUpdateItemDTO item);
-        void UpsertItems(List<CreateOrUpdateItemDTO> items);
-        void DeleteItem(int id);
-        void DeleteItems(List<int> itemIds);
+        Task<int> UpsertItem(CreateOrUpdateItemDTO item);
+        Task UpsertItems(List<CreateOrUpdateItemDTO> items);
+        Task DeleteItem(int id);
+        Task DeleteItems(List<int> itemIds);
     }
 }
